@@ -280,6 +280,9 @@ function createCard(item) {
   price.append(el('small', '', priceBasis(item)));
   bottom.append(price);
   const actions = el('div', 'card-actions');
+  const favorite = el('button', 'favorite-button', '♡');
+  favorite.type = 'button'; favorite.title = 'Зберегти';
+  favorite.addEventListener('click', async (event) => { event.stopPropagation(); const { data: { session } } = await supabase.auth.getSession(); if (!session) { window.location.href = './cabinet.html'; return; } const { error } = await supabase.from('user_favorites').upsert({ user_id: session.user.id, unit_id: item.id }); if (error) showToast(error.message, 'error'); else { favorite.textContent='♥'; showToast('Збережено у кабінеті'); } });
   const details = el('button', 'details-button', 'Детальніше');
   details.type = 'button';
   details.addEventListener('click', () => openDetails(item));
@@ -290,7 +293,7 @@ function createCard(item) {
   more.type = 'button';
   more.title = coordinateLabel(item);
   more.addEventListener('click', () => selectOnMap(item));
-  actions.append(details, edit, more);
+  actions.append(favorite, details, edit, more);
   bottom.append(actions);
   body.append(bottom);
   article.append(media, body);
@@ -461,6 +464,9 @@ function createMapResult(item) {
   const precision = el('span', `coordinate-label${hasExactPoint(item) ? '' : ' approx'}`, coordinateLabel(item));
   copy.append(precision);
   const actions = el('div', 'map-result-actions');
+  const favorite = el('button', 'favorite-button', '♡');
+  favorite.type = 'button'; favorite.title = 'Зберегти';
+  favorite.addEventListener('click', async (event) => { event.stopPropagation(); const { data: { session } } = await supabase.auth.getSession(); if (!session) { window.location.href = './cabinet.html'; return; } const { error } = await supabase.from('user_favorites').upsert({ user_id: session.user.id, unit_id: item.id }); if (error) showToast(error.message, 'error'); else { favorite.textContent='♥'; showToast('Збережено у кабінеті'); } });
   const details = el('button', 'details-button', 'Детальніше');
   details.type = 'button';
   details.addEventListener('click', (event) => { event.stopPropagation(); openDetails(item); });
