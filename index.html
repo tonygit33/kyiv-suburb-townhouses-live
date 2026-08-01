@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="Реальні будинки, таунхауси й дуплекси у передмісті Києва — каталог, карта та точні джерела.">
+  <meta name="theme-color" content="#173b2c">
+  <title>Доми біля Києва — каталог і карта</title>
+  <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner shell">
+      <a class="brand" href="#top" data-view-link="catalog" aria-label="На головну">
+        <span class="brand-symbol" aria-hidden="true">⌂</span>
+        <span>Доми біля Києва</span>
+      </a>
+      <nav class="main-nav" aria-label="Головна навігація">
+        <button class="nav-link active" data-view="catalog" type="button">Каталог</button>
+        <button class="nav-link" data-view="map" type="button">Карта</button>
+        <a href="#about">Про каталог</a>
+      </nav>
+      <div class="header-actions">
+        <button class="button button-light admin-action" id="addPropertyButton" type="button">
+          <span aria-hidden="true">＋</span><span>Додати об’єкт</span>
+        </button>
+        <button class="button button-outline admin-action" id="adminButton" type="button">
+          <span aria-hidden="true">✎</span><span id="adminButtonLabel">Редагувати</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="catalog-view view active" id="catalogView">
+      <section class="hero" id="heroSection">
+        <div class="hero-overlay"></div>
+        <div class="shell hero-content">
+          <p class="eyebrow">Живий каталог передмістя Києва</p>
+          <h1>Реальні будинки біля Києва для життя та відпочинку</h1>
+          <p class="hero-copy">Пропозиції від власників і забудовників. Актуальні ціни, чесні фото, джерела та адреси на інтерактивній карті.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#catalog">Переглянути об’єкти</a>
+            <button class="button button-glass" data-view="map" type="button">Відкрити карту</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="search-dock shell" aria-label="Фільтри каталогу">
+        <label class="field field-wide">
+          <span>Локація або адреса</span>
+          <div class="input-icon"><span aria-hidden="true">⌖</span><input id="searchInput" type="search" placeholder="Буча, Ірпінь, назва або вулиця"></div>
+        </label>
+        <label class="field">
+          <span>Локація</span>
+          <select id="locationFilter"><option value="">Усі локації</option></select>
+        </label>
+        <label class="field">
+          <span>Ціна, $</span>
+          <select id="priceFilter">
+            <option value="">Будь-яка</option>
+            <option value="0-80000">До 80 000</option>
+            <option value="80000-120000">80–120 тис.</option>
+            <option value="120000-200000">120–200 тис.</option>
+            <option value="200000-">Від 200 000</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Тип</span>
+          <select id="typeFilter">
+            <option value="">Будь-який</option>
+            <option value="concrete">Окремий об’єкт</option>
+            <option value="project_offer">Пропозиція комплексу</option>
+          </select>
+        </label>
+        <button class="button button-primary search-button" id="searchButton" type="button">Пошук</button>
+      </section>
+
+      <section class="stats-strip">
+        <div class="shell stats-grid">
+          <div><strong id="statObjects">—</strong><span>опублікованих об’єктів</span></div>
+          <div><strong id="statLocations">—</strong><span>міст і селищ</span></div>
+          <div><strong id="statPhotos">—</strong><span>об’єктів із фото</span></div>
+          <div><strong id="statExactMap">—</strong><span>точних точок на карті</span></div>
+        </div>
+      </section>
+
+      <section class="catalog shell" id="catalog">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow dark">Каталог</p>
+            <div class="heading-row"><h2>Актуальні пропозиції</h2><span class="count-pill" id="objectCountPill">—</span></div>
+          </div>
+          <label class="sort-control"><span>Сортування</span><select id="sortFilter"><option value="featured">Спочатку з фото</option><option value="newest">Нові спочатку</option><option value="price-asc">Ціна: від меншої</option><option value="price-desc">Ціна: від більшої</option><option value="area-desc">Площа: від більшої</option></select></label>
+        </div>
+
+        <div class="catalog-meta">
+          <p id="resultCount">Завантаження…</p>
+          <button class="text-button" id="clearFilters" type="button">Скинути фільтри</button>
+        </div>
+        <div class="message error-message" id="errorMessage" hidden></div>
+        <div class="property-grid" id="propertyGrid" aria-live="polite"></div>
+        <div class="catalog-pagination" id="catalogPagination" hidden>
+          <p id="paginationStatus"></p>
+          <button class="load-more-button" id="loadMoreButton" type="button">Показати ще 12</button>
+        </div>
+        <div class="message" id="emptyMessage" hidden>За цими фільтрами об’єктів не знайдено.</div>
+      </section>
+
+      <section class="map-preview shell">
+        <div class="map-preview-copy">
+          <p class="eyebrow dark">Пошук на карті</p>
+          <h2>Усі об’єкти на справжній інтерактивній карті</h2>
+          <p>Масштабуйте, рухайте карту, відкривайте кластери та переходьте до конкретної картки. Точки з неповною адресою чесно позначені як приблизні.</p>
+          <button class="button button-primary" data-view="map" type="button">Відкрити карту</button>
+        </div>
+        <div class="map-preview-map" aria-hidden="true"><div class="preview-road r1"></div><div class="preview-road r2"></div><div class="preview-river"></div><span class="preview-label l1">Буча</span><span class="preview-label l2">Ірпінь</span><span class="preview-label l3">Київ</span><span class="preview-pin p1">12</span><span class="preview-pin p2">9</span><span class="preview-pin p3">15</span></div>
+      </section>
+
+      <section class="about" id="about">
+        <div class="shell about-grid">
+          <div><p class="eyebrow dark">Про каталог</p><h2>Дані, а не рекламний макет</h2></div>
+          <div><p>Кожна картка надходить із Supabase та має першоджерело. Агенти додають об’єкти по одному, фотографії оптимізуються до WebP, а неповні дані залишаються з позначкою перевірки.</p><p>Редактор дозволяє виправити адресу, ціну, опис і точку на карті без нового deployment сайту.</p></div>
+        </div>
+      </section>
+    </section>
+
+    <section class="map-view view" id="mapView">
+      <div class="map-toolbar">
+        <div class="shell map-toolbar-inner">
+          <label class="map-search"><span aria-hidden="true">⌖</span><input id="mapSearchInput" type="search" placeholder="Введіть адресу, назву або населений пункт"></label>
+          <select id="mapLocationFilter"><option value="">Усі локації</option></select>
+          <select id="mapPriceFilter"><option value="">Будь-яка ціна</option><option value="0-80000">До 80 000 $</option><option value="80000-120000">80–120 тис. $</option><option value="120000-200000">120–200 тис. $</option><option value="200000-">Від 200 000 $</option></select>
+          <button class="button button-primary" id="mapApplyFilters" type="button">Пошук</button>
+          <div class="view-switch"><button data-view="catalog" type="button">Список</button><button class="active" data-view="map" type="button">Карта</button></div>
+        </div>
+      </div>
+      <div class="map-layout">
+        <aside class="map-results">
+          <div class="map-results-head"><div><strong id="mapResultsCount">—</strong><span>об’єктів на карті</span></div><button class="icon-button" id="fitMapButton" type="button" title="Показати всі точки">⌗</button></div>
+          <div class="precision-note"><span class="dot exact"></span> точна адреса <span class="dot approximate"></span> приблизна локація</div>
+          <div class="map-result-list" id="mapResultList"></div>
+          <button class="map-load-more" id="mapLoadMore" type="button" hidden>Показати ще 12 об’єктів</button>
+        </aside>
+        <div class="map-stage"><div id="map" role="application" aria-label="Інтерактивна карта об’єктів"></div><div class="map-selected" id="mapSelected" hidden></div></div>
+      </div>
+    </section>
+  </main>
+
+  <dialog class="detail-dialog" id="detailDialog"><button class="dialog-close" data-close-dialog="detailDialog" aria-label="Закрити">×</button><div id="dialogContent"></div></dialog>
+
+  <dialog class="admin-dialog" id="authDialog">
+    <button class="dialog-close" data-close-dialog="authDialog" aria-label="Закрити">×</button>
+    <form class="admin-form compact" id="authForm">
+      <p class="eyebrow dark">Адміністрування</p><h2>Увійти для редагування</h2>
+      <p class="form-hint">Введіть адресу адміністратора. Supabase надішле одноразове посилання для входу.</p>
+      <label><span>Email</span><input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+      <button class="button button-primary" type="submit">Надіслати посилання</button>
+      <p class="form-status" id="authStatus" aria-live="polite"></p>
+    </form>
+  </dialog>
+
+  <dialog class="admin-dialog wide" id="editDialog">
+    <button class="dialog-close" data-close-dialog="editDialog" aria-label="Закрити">×</button>
+    <form class="admin-form" id="editForm">
+      <div class="form-title"><div><p class="eyebrow dark">Редактор</p><h2>Редагувати об’єкт</h2></div><span class="admin-badge">Admin</span></div>
+      <input id="editUnitId" type="hidden">
+      <div class="form-grid">
+        <label class="span-2"><span>Назва</span><input id="editTitle" required></label>
+        <label><span>Ціна</span><input id="editPrice" type="number" min="0" step="1"></label>
+        <label><span>Валюта</span><select id="editCurrency"><option>USD</option><option>EUR</option><option>UAH</option></select></label>
+        <label><span>Площа, м²</span><input id="editArea" type="number" min="0" step="0.1"></label>
+        <label><span>Ділянка, сот.</span><input id="editLand" type="number" min="0" step="0.1"></label>
+        <label><span>Поверхи</span><input id="editFloors" type="number" min="0" step="1"></label>
+        <label><span>Спальні</span><input id="editBedrooms" type="number" min="0" step="1"></label>
+        <label class="span-2"><span>Адреса</span><input id="editAddress"></label>
+        <label><span>Публікація</span><select id="editPublication"><option value="published">Опубліковано</option><option value="review">На перевірці</option><option value="archive">Архів</option></select></label>
+        <label><span>Точність координат</span><select id="editPrecision"><option value="exact">Точна точка</option><option value="address">За адресою</option><option value="street">Вулиця</option><option value="settlement">Населений пункт</option><option value="approximate">Приблизно</option></select></label>
+        <label><span>Широта</span><input id="editLatitude" type="number" step="0.0000001"></label>
+        <label><span>Довгота</span><input id="editLongitude" type="number" step="0.0000001"></label>
+        <label class="span-2"><span>Опис</span><textarea id="editDescription" rows="5"></textarea></label>
+        <label class="span-2"><span>Першоджерело</span><input id="editSourceUrl" type="url"></label>
+      </div>
+      <div class="coordinate-editor"><div><strong>Точка на карті</strong><p>Перетягніть маркер у точне місце. Координати у формі оновляться автоматично.</p></div><div id="editMap"></div></div>
+      <div class="form-actions"><button class="button button-outline" type="button" data-close-dialog="editDialog">Скасувати</button><button class="button button-primary" type="submit">Зберегти зміни</button></div>
+      <p class="form-status" id="editStatus" aria-live="polite"></p>
+    </form>
+  </dialog>
+
+  <dialog class="admin-dialog wide" id="addDialog">
+    <button class="dialog-close" data-close-dialog="addDialog" aria-label="Закрити">×</button>
+    <form class="admin-form" id="addForm">
+      <div class="form-title"><div><p class="eyebrow dark">Новий об’єкт</p><h2>Додати пропозицію</h2></div><span class="admin-badge">Admin</span></div>
+      <div class="form-grid">
+        <label class="span-2"><span>Назва *</span><input id="addTitle" required></label>
+        <label><span>Населений пункт *</span><input id="addSettlement" required placeholder="Буча"></label>
+        <label><span>Адреса</span><input id="addAddress" placeholder="Буча, вул. …"></label>
+        <label><span>Ціна</span><input id="addPrice" type="number" min="0" step="1"></label>
+        <label><span>Валюта</span><select id="addCurrency"><option>USD</option><option>EUR</option><option>UAH</option></select></label>
+        <label><span>Площа, м²</span><input id="addArea" type="number" min="0" step="0.1"></label>
+        <label><span>Ділянка, сот.</span><input id="addLand" type="number" min="0" step="0.1"></label>
+        <label><span>Поверхи</span><input id="addFloors" type="number" min="0" step="1"></label>
+        <label><span>Спальні</span><input id="addBedrooms" type="number" min="0" step="1"></label>
+        <label class="span-2"><span>Опис</span><textarea id="addDescription" rows="4"></textarea></label>
+        <label class="span-2"><span>Першоджерело *</span><input id="addSourceUrl" type="url" required></label>
+        <label class="span-2"><span>URL фотографій</span><textarea id="addPhotos" rows="4" placeholder="Один HTTPS URL на рядок. До чотирьох фото автоматично стануть WebP у Storage."></textarea></label>
+        <label><span>Широта</span><input id="addLatitude" type="number" step="0.0000001"></label>
+        <label><span>Довгота</span><input id="addLongitude" type="number" step="0.0000001"></label>
+        <label><span>Публікація</span><select id="addPublication"><option value="published">Опублікувати</option><option value="review">Зберегти на перевірку</option></select></label>
+      </div>
+      <div class="form-actions"><button class="button button-outline" type="button" data-close-dialog="addDialog">Скасувати</button><button class="button button-primary" type="submit">Додати об’єкт</button></div>
+      <p class="form-status" id="addStatus" aria-live="polite"></p>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <footer><div class="shell footer-inner"><strong>Доми біля Києва</strong><span>Дані з відкритих джерел. Актуальність умов перевіряйте у продавця.</span><span id="liveState">Підключення до бази…</span></div></footer>
+</body>
+</html>
