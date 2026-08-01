@@ -532,7 +532,11 @@ function openDetails(item) {
   layout.append(media);
   const copy = el('div', 'dialog-copy');
   copy.append(el('p', 'property-location', itemLocation(item)));
-  copy.append(el('h2', '', item.title || 'Об’єкт нерухомості'));
+  const rawTitle = String(item.title || '').trim();
+  const technicalTitle = /^(?:ID\s*)?\d{5,}$/i.test(rawTitle);
+  const placeTitle = item.location_name || item.address || 'передмісті Києва';
+  const displayTitle = technicalTitle ? `Будинок у ${placeTitle}` : (rawTitle || `Будинок у ${placeTitle}`);
+  copy.append(el('h2', '', displayTitle));
   copy.append(el('span', `coordinate-label${hasExactPoint(item) ? '' : ' approx'}`, coordinateLabel(item)));
   if (item.description) copy.append(el('p', 'lead', item.description));
   copy.append(el('div', 'price', formatPrice(item)));
@@ -540,8 +544,8 @@ function openDetails(item) {
   [
     detailFact('Площа', num(item.area_m2) === null ? null : `${formatNumber(item.area_m2)} м²`),
     detailFact('Ділянка', num(item.land_area_sotka) === null ? null : `${formatNumber(item.land_area_sotka)} сот.`),
-    detailFact('Поверхи', formatNumber(item.floors, 0)),
-    detailFact('Спальні', formatNumber(item.bedrooms, 0)),
+    detailFact('Поверхи', num(item.floors) > 0 ? formatNumber(item.floors, 0) : null),
+    detailFact('Спальні', num(item.bedrooms) > 0 ? formatNumber(item.bedrooms, 0) : null),
     detailFact('Адреса', item.address),
     detailFact('Продавець', item.developer_name),
     detailFact('Перевірено', item.checked_at ? new Intl.DateTimeFormat('uk-UA').format(new Date(`${item.checked_at}T00:00:00`)) : null),
@@ -781,6 +785,15 @@ function bindEvents() {
 
 async function boot() {
   bindEvents();
+  const mobileFilterButton = $('mobileFilterToggle');
+  if (mobileFilterButton) {
+    mobileFilterButton.addEventListener('click', () => {
+      const dock = document.querySelector('.search-dock');
+      const open = dock.classList.toggle('filters-open');
+      mobileFilterButton.setAttribute('aria-expanded', String(open));
+      mobileFilterButton.setAttribute('aria-label', open ? 'Сховати фільтри' : 'Показати фільтри');
+    });
+  }
   const { data: { session } } = await supabase.auth.getSession();
   await refreshAdminState(session);
   supabase.auth.onAuthStateChange(async (_event, nextSession) => {
