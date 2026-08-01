@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css">
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./theme.css">
   <script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
   <script type="module" src="./app.js"></script>
 </head>
@@ -22,7 +23,7 @@
       <nav class="main-nav" aria-label="Головна навігація">
         <button class="nav-link active" data-view="catalog" type="button">Каталог</button>
         <button class="nav-link" data-view="map" type="button">Карта</button>
-        <a href="#about">Про каталог</a>
+        <a href="#about">Про райони</a><a href="#catalog">Блог</a><a href="#about">Про проєкт</a><a href="#about">Контакти</a>
       </nav>
       <div class="header-actions">
         <button class="button button-light admin-action" id="addPropertyButton" type="button">
@@ -31,6 +32,7 @@
         <button class="button button-outline admin-action" id="adminButton" type="button">
           <span aria-hidden="true">✎</span><span id="adminButtonLabel">Редагувати</span>
         </button>
+        <button class="avatar-menu" type="button" aria-label="Профіль адміністратора">АД</button>
       </div>
     </div>
   </header>
@@ -43,6 +45,11 @@
           <p class="eyebrow">Живий каталог передмістя Києва</p>
           <h1>Реальні будинки біля Києва для життя та відпочинку</h1>
           <p class="hero-copy">Пропозиції від власників і забудовників. Актуальні ціни, чесні фото, джерела та адреси на інтерактивній карті.</p>
+          <div class="hero-features" aria-label="Переваги каталогу">
+            <div class="hero-feature"><i>✓</i><span>Перевірені пропозиції</span></div>
+            <div class="hero-feature"><i>◇</i><span>Актуальні ціни</span></div>
+            <div class="hero-feature"><i>⌖</i><span>Точні адреси на карті</span></div>
+          </div>
           <div class="hero-actions">
             <a class="button button-primary" href="#catalog">Переглянути об’єкти</a>
             <button class="button button-glass" data-view="map" type="button">Відкрити карту</button>
