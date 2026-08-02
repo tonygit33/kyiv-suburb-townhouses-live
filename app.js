@@ -38,6 +38,7 @@ const state = {
   editMap: null,
   editMarker: null,
   filters: { query: '', location: '', price: '', type: '', sort: 'featured' },
+  favoriteIds: new Set(),
 };
 
 const $ = (id) => document.getElementById(id);
@@ -131,6 +132,33 @@ function showSkeletons() {
   $('propertyGrid').replaceChildren(...Array.from({ length: 8 }, () => el('div', 'skeleton')));
 }
 
+async function loadFavoriteIds() {
+  const { data: { session } } = await supabase.auth.getSession();
+  state.favoriteIds = new Set();
+  if (!session) return;
+  const { data, error } = await supabase.from('user_favorites').select('unit_id');
+  if (error) { console.warn('favorites_load_failed', error.message); return; }
+  state.favoriteIds = new Set((data || []).map((row) => row.unit_id));
+}
+
+async function toggleFavorite(item, button) {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = './cabinet.html'; return; }
+  const saved = state.favoriteIds.has(item.id);
+  button.disabled = true;
+  const query = saved
+    ? supabase.from('user_favorites').delete().eq('unit_id', item.id)
+    : supabase.from('user_favorites').upsert({ user_id: session.user.id, unit_id: item.id });
+  const { error } = await query;
+  button.disabled = false;
+  if (error) { showToast(error.message, 'error'); return; }
+  if (saved) state.favoriteIds.delete(item.id); else state.favoriteIds.add(item.id);
+  button.textContent = saved ? '♡' : '♥';
+  button.classList.toggle('saved', !saved);
+  button.title = saved ? 'Зберегти' : 'Прибрати зі збереженого';
+  showToast(saved ? 'Видалено зі збереженого' : 'Збережено у кабінеті');
+}
+
 function setLive(text) {
   $('liveState').textContent = text;
 }
@@ -150,6 +178,7 @@ async function loadCatalog({ quiet = false } = {}) {
       .limit(CONFIG.maxRows);
     if (error) throw error;
     state.items = Array.isArray(data) ? data : [];
+    await loadFavoriteIds();
     populateLocations();
     renderStats();
     renderCatalog();
@@ -280,9 +309,11 @@ function createCard(item) {
   price.append(el('small', '', priceBasis(item)));
   bottom.append(price);
   const actions = el('div', 'card-actions');
-  const favorite = el('button', 'favorite-button', '♡');
-  favorite.type = 'button'; favorite.title = 'Зберегти';
-  favorite.addEventListener('click', async (event) => { event.stopPropagation(); const { data: { session } } = await supabase.auth.getSession(); if (!session) { window.location.href = './cabinet.html'; return; } const { error } = await supabase.from('user_favorites').upsert({ user_id: session.user.id, unit_id: item.id }); if (error) showToast(error.message, 'error'); else { favorite.textContent='♥'; showToast('Збережено у кабінеті'); } });
+  const isSaved = state.favoriteIds.has(item.id);
+  const favorite = el('button', `favorite-button${isSaved ? ' saved' : ''}`, isSaved ? '♥' : '♡');
+  favorite.type = 'button'; favorite.title = isSaved ? 'Прибрати зі збереженого' : 'Зберегти';
+  favorite.setAttribute('aria-pressed', String(isSaved));
+  favorite.addEventListener('click', async (event) => { event.stopPropagation(); await toggleFavorite(item, favorite); favorite.setAttribute('aria-pressed', String(state.favoriteIds.has(item.id))); });
   const details = el('button', 'details-button', 'Детальніше');
   details.type = 'button';
   details.addEventListener('click', () => openDetails(item));
@@ -464,9 +495,11 @@ function createMapResult(item) {
   const precision = el('span', `coordinate-label${hasExactPoint(item) ? '' : ' approx'}`, coordinateLabel(item));
   copy.append(precision);
   const actions = el('div', 'map-result-actions');
-  const favorite = el('button', 'favorite-button', '♡');
-  favorite.type = 'button'; favorite.title = 'Зберегти';
-  favorite.addEventListener('click', async (event) => { event.stopPropagation(); const { data: { session } } = await supabase.auth.getSession(); if (!session) { window.location.href = './cabinet.html'; return; } const { error } = await supabase.from('user_favorites').upsert({ user_id: session.user.id, unit_id: item.id }); if (error) showToast(error.message, 'error'); else { favorite.textContent='♥'; showToast('Збережено у кабінеті'); } });
+  const isSaved = state.favoriteIds.has(item.id);
+  const favorite = el('button', `favorite-button${isSaved ? ' saved' : ''}`, isSaved ? '♥' : '♡');
+  favorite.type = 'button'; favorite.title = isSaved ? 'Прибрати зі збереженого' : 'Зберегти';
+  favorite.setAttribute('aria-pressed', String(isSaved));
+  favorite.addEventListener('click', async (event) => { event.stopPropagation(); await toggleFavorite(item, favorite); favorite.setAttribute('aria-pressed', String(state.favoriteIds.has(item.id))); });
   const details = el('button', 'details-button', 'Детальніше');
   details.type = 'button';
   details.addEventListener('click', (event) => { event.stopPropagation(); openDetails(item); });
@@ -804,6 +837,9 @@ async function boot() {
   await refreshAdminState(session);
   supabase.auth.onAuthStateChange(async (_event, nextSession) => {
     await refreshAdminState(nextSession);
+    await loadFavoriteIds();
+    renderCatalog();
+    if (state.mapLoaded) renderMapResults();
     if (state.isAdmin) {
       closeDialog($('authDialog'));
       showToast('Вхід адміністратора виконано');
