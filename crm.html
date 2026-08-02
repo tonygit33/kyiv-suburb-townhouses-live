@@ -1,1 +1,58 @@
-<!doctype html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#173b2c"><title>CRM продавців — Доми біля Києва</title><link rel="stylesheet" href="./crm.css?v=3"><script type="module" src="./crm.js?v=3"></script></head><body><header><a class="brand" href="./">⌂ Доми біля Києва</a><nav><a href="./cabinet.html">Кабінет</a><a href="./">Каталог</a></nav></header><main><section id="auth" class="auth"><p class="eyebrow">Внутрішня CRM</p><h1>Запрошення продавців</h1><p>Увійдіть адміністративним email, щоб призначати готові оголошення продавцям.</p><form id="login"><input id="email" type="email" required placeholder="admin@example.com"><button>Увійти через email</button></form><p id="authStatus"></p></section><section id="crm" hidden><div class="hero"><div><p class="eyebrow">Seller onboarding</p><h1>Передати готові оголошення продавцю</h1><p>Виберіть об’єкти, введіть email і скопіюйте персональне посилання.</p></div><button id="logout" class="secondary">Вийти</button></div><div class="layout"><section class="panel"><div class="panel-head"><div><p class="eyebrow">Крок 1</p><h2>Оберіть оголошення</h2></div><input id="search" placeholder="Пошук за назвою або локацією"></div><div id="units" class="units"></div></section><aside class="panel invite"><p class="eyebrow">Крок 2</p><h2>Створити запрошення</h2><label>Email продавця<input id="sellerEmail" type="email" placeholder="seller@example.com"></label><label>Діє, днів<input id="days" type="number" min="1" max="60" value="14"></label><p><strong id="selectedCount">0</strong> об’єктів вибрано</p><button id="createInvite">Створити посилання</button><div id="result" hidden><label>Готове посилання<textarea id="inviteUrl" readonly></textarea></label><button id="copy" class="secondary">Копіювати</button></div><p id="status"></p></aside></div><section class="panel history"><div class="panel-head"><div><p class="eyebrow">Контроль</p><h2>Останні запрошення</h2></div><button id="refresh" class="secondary">Оновити</button></div><div id="history"></div></section></section></main></body></html>
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#173b2c">
+  <title>CRM — Доми біля Києва</title>
+  <link rel="stylesheet" href="./crm.css?v=4">
+  <script type="module" src="./crm.js?v=4"></script>
+</head>
+<body>
+<header><a class="brand" href="./">⌂ Доми біля Києва</a><nav><a href="./cabinet.html">Кабінет</a><a href="./">Каталог</a></nav></header>
+<main>
+  <section id="auth" class="auth">
+    <p class="eyebrow">Внутрішня CRM</p><h1>Контроль каталогу і продавців</h1>
+    <p>Увійдіть адміністративним email.</p>
+    <form id="login"><input id="email" type="email" required placeholder="admin@example.com"><button>Увійти через email</button></form>
+    <p id="authStatus"></p>
+  </section>
+
+  <section id="crm" hidden>
+    <div class="hero"><div><p class="eyebrow">Production CRM</p><h1>Каталог і продавці</h1><p>Ручна перевірка оголошень та передача готових карток продавцям.</p></div><button id="logout" class="secondary">Вийти</button></div>
+    <nav class="tabs" aria-label="CRM розділи">
+      <button class="active" data-tab="review">Перевірка оголошень <span id="reviewBadge">0</span></button>
+      <button data-tab="invites">Запрошення продавців</button>
+    </nav>
+
+    <section class="tab-panel active" id="reviewPanel">
+      <div class="review-summary">
+        <button data-review-filter="all" class="active"><strong id="reviewAll">0</strong><span>Уся черга</span></button>
+        <button data-review-filter="pending"><strong id="reviewPending">0</strong><span>Очікують</span></button>
+        <button data-review-filter="in_progress"><strong id="reviewProgress">0</strong><span>У роботі</span></button>
+        <button data-review-filter="blocked"><strong id="reviewBlocked">0</strong><span>Заблоковані</span></button>
+        <button data-review-filter="verified"><strong id="reviewVerified">0</strong><span>Перевірені</span></button>
+      </div>
+      <div class="review-layout">
+        <section class="panel review-list-panel">
+          <div class="panel-head"><div><p class="eyebrow">Черга</p><h2>Оголошення</h2></div><input id="reviewSearch" type="search" placeholder="Назва, локація, адреса"></div>
+          <div id="reviewList" class="review-list"></div>
+          <div id="reviewEmpty" class="empty" hidden>За цим фільтром нічого немає.</div>
+        </section>
+        <aside class="panel review-editor" id="reviewEditor">
+          <div class="empty">Оберіть оголошення з черги.</div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="invitesPanel">
+      <div class="layout">
+        <section class="panel"><div class="panel-head"><div><p class="eyebrow">Крок 1</p><h2>Оберіть оголошення</h2></div><input id="search" placeholder="Пошук за назвою або локацією"></div><div id="units" class="units"></div></section>
+        <aside class="panel invite"><p class="eyebrow">Крок 2</p><h2>Створити запрошення</h2><label>Email продавця<input id="sellerEmail" type="email" placeholder="seller@example.com"></label><label>Діє, днів<input id="days" type="number" min="1" max="60" value="14"></label><p><strong id="selectedCount">0</strong> об’єктів вибрано</p><button id="createInvite">Створити посилання</button><div id="result" hidden><label>Готове посилання<textarea id="inviteUrl" readonly></textarea></label><button id="copy" class="secondary">Копіювати</button></div><p id="status"></p></aside>
+      </div>
+      <section class="panel history"><div class="panel-head"><div><p class="eyebrow">Контроль</p><h2>Останні запрошення</h2></div><button id="refresh" class="secondary">Оновити</button></div><div id="history"></div></section>
+    </section>
+  </section>
+</main>
+</body>
+</html>
