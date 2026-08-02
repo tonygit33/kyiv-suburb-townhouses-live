@@ -317,7 +317,10 @@ function createCard(item) {
   const details = el('button', 'details-button', 'Детальніше');
   details.type = 'button';
   details.addEventListener('click', () => openDetails(item));
-  const edit = el('button', 'edit-button', 'Редагувати');
+  const inquiry = el('button', 'edit-button inquiry-button', 'Запитати');
+  inquiry.type = 'button';
+  inquiry.addEventListener('click', () => { window.location.href = `./leads.html?unit=${encodeURIComponent(item.id)}`; });
+  const edit = el('button', 'edit-button admin-only-action', 'Редагувати');
   edit.type = 'button';
   edit.addEventListener('click', () => requestEdit(item));
   const more = el('button', 'more-button', '⋮');
@@ -598,6 +601,9 @@ function openDetails(item) {
     link.href = source; link.target = '_blank'; link.rel = 'noopener noreferrer nofollow';
     actions.append(link);
   }
+  const inquiry = el('a', 'source-link inquiry-link', 'Запитати продавця');
+  inquiry.href = `./leads.html?unit=${encodeURIComponent(item.id)}`;
+  actions.append(inquiry);
   const mapButton = el('button', 'edit-button', 'Показати на карті');
   mapButton.type = 'button';
   mapButton.addEventListener('click', () => { closeDialog($('detailDialog')); selectOnMap(item); });
