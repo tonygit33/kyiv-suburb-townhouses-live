@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /crm.html
+Disallow: /crm/

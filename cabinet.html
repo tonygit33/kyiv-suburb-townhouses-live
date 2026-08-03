@@ -1,1 +1,152 @@
-<!doctype html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#173b2c"><title>Кабінет — Доми біля Києва</title><link rel="stylesheet" href="./cabinet.css?v=4"><link rel="stylesheet" href="./cabinet-extra.css?v=3"><script type="module" src="./cabinet.js?v=4"></script></head><body><header><a class="brand" href="./"><span>⌂</span> Доми біля Києва</a><a class="back" href="./">До каталогу</a></header><main><section class="auth-card" id="authCard"><p class="eyebrow">Особистий кабінет</p><h1>Ваші об’єкти та збережене</h1><p>Увійдіть через одноразове посилання на email. Пароль не потрібен.</p><form id="loginForm"><input id="email" type="email" required placeholder="you@example.com"><button>Надіслати посилання</button></form><p id="authStatus"></p></section><section id="cabinet" hidden><div class="profile"><div><p class="eyebrow">Кабінет</p><h1 id="profileName">Завантаження…</h1><p id="profileEmail"></p></div><button id="logout">Вийти</button></div><nav class="tabs"><button class="active" data-tab="favorites">Збережене <span id="favoriteCount">0</span></button><button data-tab="seller">Мої оголошення <span id="sellerCount">0</span></button><button data-tab="leads">Заявки <span id="leadCount">0</span></button><button data-tab="invite">Прийняти запрошення</button></nav><section class="panel active" id="favoritesPanel"><div class="panel-head"><div><p class="eyebrow">Покупець</p><h2>Збережені будинки</h2></div></div><div class="grid" id="favoriteGrid"></div><div class="empty" id="favoritesEmpty" hidden>Поки нічого не збережено. Натисніть ♡ у каталозі.</div></section><section class="panel" id="sellerPanel"><div class="panel-head"><div><p class="eyebrow">Продавець</p><h2>Підтверджені оголошення</h2></div><span class="badge" id="sellerRole">Статус</span></div><div class="seller-stats" id="sellerStats"><div><strong id="sellerStatTotal">0</strong><span>Усього</span></div><div><strong id="sellerStatAvailable">0</strong><span>У продажу</span></div><div><strong id="sellerStatReserved">0</strong><span>Резерв</span></div><div><strong id="sellerStatSold">0</strong><span>Продано</span></div><div><strong id="sellerStatFavorites">0</strong><span>Збережень</span></div></div><div class="grid" id="sellerGrid"></div><div class="empty" id="sellerEmpty" hidden>Оголошення ще не прив’язані. Прийміть запрошення від адміністратора.</div></section><section class="panel" id="leadsPanel"><div class="panel-head leads-head"><div><p class="eyebrow">Продавець</p><h2>Вхідні заявки</h2></div><button class="secondary-action" id="refreshLeads">Оновити</button></div><div class="lead-summary" id="leadSummary"><button class="active" data-lead-filter="all"><strong id="leadAll">0</strong><span>Усі</span></button><button data-lead-filter="new"><strong id="leadNew">0</strong><span>Нові</span></button><button data-lead-filter="contacted"><strong id="leadContacted">0</strong><span>Зв’язались</span></button><button data-lead-filter="viewing"><strong id="leadViewing">0</strong><span>Перегляд</span></button><button data-lead-filter="negotiation"><strong id="leadNegotiation">0</strong><span>Переговори</span></button></div><div class="lead-toolbar"><input id="leadSearch" type="search" placeholder="Пошук за клієнтом, телефоном або об’єктом"><select id="leadStatusFilter"><option value="all">Усі статуси</option><option value="new">Нові</option><option value="contacted">Зв’язались</option><option value="viewing">Перегляд</option><option value="negotiation">Переговори</option><option value="won">Успішно</option><option value="lost">Втрачено</option></select></div><div class="lead-list" id="leadList"></div><div class="empty" id="leadsEmpty" hidden>Вхідних заявок поки немає.</div></section><section class="panel" id="invitePanel"><div class="invite-card"><p class="eyebrow">Запрошення продавця</p><h2>Прийняти готові оголошення</h2><p>Вставте код із посилання, яке надіслав адміністратор. Після підтвердження об’єкти з’являться у вашому кабінеті.</p><form id="inviteForm"><input id="inviteToken" required placeholder="Код запрошення"><button>Прийняти оголошення</button></form><p id="inviteStatus"></p></div></section></section></main></body></html>
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="Особистий кабінет покупця і продавця нерухомості у передмісті Києва.">
+  <meta name="theme-color" content="#173b2c">
+  <title>Кабінет — Доми біля Києва</title>
+  <link rel="stylesheet" href="./cabinet.css?v=5">
+  <link rel="stylesheet" href="./cabinet-extra.css?v=4">
+  <script type="module" src="./cabinet.js?v=5"></script>
+</head>
+<body>
+  <header>
+    <a class="brand" href="./"><span aria-hidden="true">⌂</span> Доми біля Києва</a>
+    <nav class="header-nav" aria-label="Навігація кабінету">
+      <a id="adminLink" class="back" href="./crm.html" hidden>CRM</a>
+      <a class="back" href="./">До каталогу</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="auth-card" id="authCard">
+      <p class="eyebrow">Особистий кабінет</p>
+      <h1>Один акаунт для купівлі й продажу</h1>
+      <p>Увійдіть через одноразове посилання на email. Пароль не потрібен. Після запрошення продавця у цьому ж акаунті відкриються оголошення та заявки.</p>
+      <form id="loginForm">
+        <label class="sr-only" for="email">Email</label>
+        <input id="email" type="email" autocomplete="email" required placeholder="you@example.com">
+        <button type="submit">Надіслати посилання</button>
+      </form>
+      <p id="authStatus" role="status" aria-live="polite"></p>
+    </section>
+
+    <section id="cabinet" hidden>
+      <div class="profile">
+        <div>
+          <p class="eyebrow">Особистий кабінет</p>
+          <h1 id="profileName">Завантаження…</h1>
+          <p id="profileEmail"></p>
+          <div class="role-chips" id="roleChips" aria-label="Доступні режими"></div>
+        </div>
+        <button id="logout" type="button">Вийти</button>
+      </div>
+
+      <nav class="tabs" aria-label="Розділи кабінету">
+        <button class="active" data-tab="favorites" type="button">Покупаю <span id="favoriteCount">0</span></button>
+        <button data-tab="seller" data-role="seller" type="button" hidden>Продаю <span id="sellerCount">0</span></button>
+        <button data-tab="leads" data-role="seller" type="button" hidden>Заявки <span id="leadCount">0</span></button>
+        <button data-tab="invite" type="button">Запрошення</button>
+        <button data-tab="settings" type="button">Профіль</button>
+      </nav>
+
+      <section class="panel active" id="favoritesPanel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Режим покупця</p>
+            <h2>Збережені будинки</h2>
+          </div>
+          <a class="secondary-link" href="./">Знайти об’єкти</a>
+        </div>
+        <div class="grid" id="favoriteGrid"></div>
+        <div class="empty" id="favoritesEmpty" hidden>Поки нічого не збережено. Натисніть ♡ у каталозі.</div>
+      </section>
+
+      <section class="panel" id="sellerPanel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Режим продавця</p>
+            <h2>Мої оголошення</h2>
+          </div>
+          <span class="badge" id="sellerRole">Статус</span>
+        </div>
+        <div class="seller-stats" id="sellerStats">
+          <div><strong id="sellerStatTotal">0</strong><span>Усього</span></div>
+          <div><strong id="sellerStatAvailable">0</strong><span>У продажу</span></div>
+          <div><strong id="sellerStatReserved">0</strong><span>Резерв</span></div>
+          <div><strong id="sellerStatSold">0</strong><span>Продано</span></div>
+          <div><strong id="sellerStatFavorites">0</strong><span>Збережень</span></div>
+        </div>
+        <div class="grid" id="sellerGrid"></div>
+        <div class="empty" id="sellerEmpty" hidden>Оголошення ще не прив’язані. Прийміть запрошення адміністратора.</div>
+      </section>
+
+      <section class="panel" id="leadsPanel">
+        <div class="panel-head leads-head">
+          <div>
+            <p class="eyebrow">Режим продавця</p>
+            <h2>Вхідні заявки</h2>
+          </div>
+          <button class="secondary-action" id="refreshLeads" type="button">Оновити</button>
+        </div>
+        <div class="lead-summary" id="leadSummary">
+          <button class="active" data-lead-filter="all" type="button"><strong id="leadAll">0</strong><span>Усі</span></button>
+          <button data-lead-filter="new" type="button"><strong id="leadNew">0</strong><span>Нові</span></button>
+          <button data-lead-filter="contacted" type="button"><strong id="leadContacted">0</strong><span>Зв’язались</span></button>
+          <button data-lead-filter="viewing" type="button"><strong id="leadViewing">0</strong><span>Перегляд</span></button>
+          <button data-lead-filter="negotiation" type="button"><strong id="leadNegotiation">0</strong><span>Переговори</span></button>
+        </div>
+        <div class="lead-toolbar">
+          <input id="leadSearch" type="search" placeholder="Пошук за клієнтом, телефоном або об’єктом">
+          <select id="leadStatusFilter" aria-label="Фільтр статусу заявок">
+            <option value="all">Усі статуси</option>
+            <option value="new">Нові</option>
+            <option value="contacted">Зв’язались</option>
+            <option value="viewing">Перегляд</option>
+            <option value="negotiation">Переговори</option>
+            <option value="won">Успішно</option>
+            <option value="lost">Втрачено</option>
+          </select>
+        </div>
+        <div class="lead-list" id="leadList"></div>
+        <div class="empty" id="leadsEmpty" hidden>Вхідних заявок поки немає.</div>
+      </section>
+
+      <section class="panel" id="invitePanel">
+        <div class="invite-card embedded">
+          <p class="eyebrow">Додати режим продавця</p>
+          <h2>Прийняти готові оголошення</h2>
+          <p>Вставте код із посилання адміністратора. Режим покупця та збережені об’єкти залишаться у цьому ж акаунті.</p>
+          <form id="inviteForm">
+            <label class="sr-only" for="inviteToken">Код запрошення</label>
+            <input id="inviteToken" required autocomplete="off" placeholder="Код запрошення">
+            <button type="submit">Прийняти оголошення</button>
+          </form>
+          <p id="inviteStatus" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <section class="panel" id="settingsPanel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Налаштування</p>
+            <h2>Контактні дані</h2>
+          </div>
+        </div>
+        <form class="profile-form" id="profileForm">
+          <label><span>Ім’я або назва</span><input id="displayName" maxlength="120" autocomplete="name"></label>
+          <label><span>Телефон</span><input id="profilePhone" maxlength="40" autocomplete="tel" placeholder="+380…"></label>
+          <label><span>Email</span><input id="accountEmail" disabled></label>
+          <button type="submit">Зберегти профіль</button>
+          <p id="profileStatus" role="status" aria-live="polite"></p>
+        </form>
+        <div class="account-note">
+          <strong>Як працюють ролі</strong>
+          <p>Покупець і продавець — це два режими одного акаунта. Адміністративний доступ перевіряється окремо й не може бути ввімкнений самим користувачем.</p>
+        </div>
+      </section>
+    </section>
+  </main>
+</body>
+</html>
