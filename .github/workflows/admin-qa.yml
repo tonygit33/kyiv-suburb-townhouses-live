@@ -34,6 +34,35 @@ jobs:
           for id in auth crm kpiGrid cityStrip catalogPanel unitList unitDetail duplicatesPanel sellersPanel invitesPanel; do
             grep -q "id=\"$id\"" crm.html || { echo "Missing #$id"; exit 1; }
           done
+      - name: Live anonymous Supabase RPC
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const source=fs.readFileSync('crm-direct.js','utf8');
+          const url=source.match(/const SUPABASE_URL='([^']+)'/)[1];
+          const key=source.match(/const SUPABASE_KEY='([^']+)'/)[1];
+          async function rpc(name,args={}){
+            const r=await fetch(`${url}/rest/v1/rpc/${name}`,{
+              method:'POST',
+              headers:{apikey:key,Authorization:`Bearer ${key}`,'Content-Type':'application/json',Accept:'application/json'},
+              body:JSON.stringify(args)
+            });
+            const text=await r.text();
+            if(!r.ok)throw new Error(`${name}: ${r.status} ${text}`);
+            return text?JSON.parse(text):null;
+          }
+          (async()=>{
+            const [overview,units,sellers]=await Promise.all([
+              rpc('admin_catalog_overview'),
+              rpc('admin_catalog_units'),
+              rpc('admin_seller_directory')
+            ]);
+            if(!overview?.totals?.units)throw new Error('overview totals missing');
+            if(!Array.isArray(units)||units.length<1)throw new Error('units empty');
+            if(!Array.isArray(sellers)||sellers.length<1)throw new Error('sellers empty');
+            console.log({units:units.length,sellers:sellers.length,on_site:overview.totals.on_site});
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
       - name: Referenced assets exist
         run: |
           test -s crm.html
