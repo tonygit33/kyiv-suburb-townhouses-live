@@ -7,7 +7,7 @@
   <meta name="description" content="Адміністративна панель каталогу таунхаусів передмістя Києва.">
   <title>Адмін-панель — Доми біля Києва</title>
   <link rel="stylesheet" href="./crm.css?v=8">
-  <script type="module" src="./crm.js?v=8"></script>
+  <script type="module" src="./crm-open.js?v=1"></script>
 </head>
 <body>
 <header class="site-header">
@@ -16,18 +16,12 @@
 </header>
 
 <main>
-  <section id="auth" class="auth-card">
-    <p class="eyebrow">Адміністратор</p>
-    <h1>Керування каталогом</h1>
-    <p>Увійдіть адміністративним email. Доступ перевіряється окремо від ролі покупця або продавця.</p>
-    <form id="login"><input id="email" type="email" required autocomplete="email" placeholder="admin@example.com"><button>Увійти через email</button></form>
-    <p id="authStatus" role="status"></p>
-  </section>
+  <section id="auth" hidden></section>
 
-  <section id="crm" hidden>
+  <section id="crm">
     <div class="hero">
       <div><p class="eyebrow">Townhouse control center</p><h1>Адмін-панель</h1><p id="syncStatus">Завантаження стану бази…</p></div>
-      <div class="hero-actions"><button id="refreshAll" class="secondary">Оновити дані</button><button id="logout" class="secondary">Вийти</button></div>
+      <div class="hero-actions"><button id="refreshAll" class="secondary">Оновити дані</button></div>
     </div>
 
     <section class="kpi-grid" id="kpiGrid" aria-label="Стан каталогу"></section>
