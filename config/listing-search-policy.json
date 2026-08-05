@@ -1,0 +1,107 @@
+{
+  "version": "1.0.0",
+  "effective_at": "2026-08-05T07:45:00+03:00",
+  "database": "Supabase townhouses-db",
+  "production_table": "public.units",
+  "city_priority": [
+    "Буча",
+    "Ірпінь",
+    "Гостомель",
+    "Горенка",
+    "Вишгород",
+    "Вишневе"
+  ],
+  "direct_live_sources": {
+    "required_for_unit_insert": true,
+    "required_for_publication": true,
+    "allowed_patterns": [
+      "direct marketplace listing with unique external ID",
+      "direct DIM.RIA property page",
+      "direct OLX listing page",
+      "direct Online.ua property page",
+      "official developer unit, section, floor-plan, or active inventory page"
+    ]
+  },
+  "search_only_sources": {
+    "may_create_unit": false,
+    "may_publish_unit": false,
+    "store_as": [
+      "public.source_observations",
+      "research candidate queue"
+    ],
+    "types": [
+      "category page",
+      "city search page",
+      "search engine snippet",
+      "cached preview",
+      "dead URL visible only in index",
+      "aggregator fragment without direct listing identity"
+    ]
+  },
+  "insert_gate": {
+    "all_required": true,
+    "conditions": [
+      "direct source opened in current run",
+      "active status confirmed",
+      "eligible property type confirmed",
+      "settlement confirmed",
+      "area known",
+      "at least one of price, address, or project known",
+      "duplicate check completed",
+      "checked_at and evidence recorded"
+    ]
+  },
+  "duplicate_policy": {
+    "auto_merge_when_uncertain": false,
+    "uncertain_status": "possible_duplicate",
+    "required_fields": [
+      "possible_duplicate_of",
+      "duplicate_reason"
+    ],
+    "signals": [
+      "external ID",
+      "direct URL",
+      "address",
+      "project",
+      "area",
+      "price",
+      "photos",
+      "phone",
+      "seller",
+      "description",
+      "room count",
+      "land area"
+    ]
+  },
+  "archive_reasons": [
+    "removed or explicitly inactive",
+    "sales suspended",
+    "confirmed duplicate",
+    "wrong property type",
+    "material source misclassification",
+    "historical research-only project"
+  ],
+  "temporary_fetch_failure_action": "mark unavailable and recheck; do not archive automatically",
+  "old_links": {
+    "production_inventory": false,
+    "allowed_uses": [
+      "testing",
+      "duplicate history",
+      "price history",
+      "source removal behavior",
+      "regression fixtures"
+    ]
+  },
+  "run_report_metrics": [
+    "checks",
+    "unique_units_touched",
+    "new_direct_live_units",
+    "updated_units",
+    "confirmed_duplicates_archived",
+    "possible_duplicates_retained",
+    "inactive_or_removed",
+    "search_only_candidates_not_inserted",
+    "unavailable_sources",
+    "next_city"
+  ]
+}
