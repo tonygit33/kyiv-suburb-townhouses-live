@@ -1,0 +1,35 @@
+name: Admin CRM QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'crm.html'
+      - 'crm.css'
+      - 'crm.js'
+      - '.github/workflows/admin-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: node --check crm.js
+      - name: Required admin UI elements
+        run: |
+          for id in auth crm kpiGrid cityStrip catalogPanel unitList unitDetail duplicatesPanel sellersPanel invitesPanel; do
+            grep -q "id=\"$id\"" crm.html || { echo "Missing #$id"; exit 1; }
+          done
+      - name: Referenced assets exist
+        run: |
+          test -s crm.html
+          test -s crm.css
+          test -s crm.js
