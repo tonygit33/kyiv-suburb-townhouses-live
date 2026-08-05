@@ -6,7 +6,7 @@ on:
     paths:
       - 'crm.html'
       - 'crm.css'
-      - 'crm-open.js'
+      - 'crm-direct.js'
       - '.github/workflows/admin-qa.yml'
   workflow_dispatch:
 
@@ -22,10 +22,12 @@ jobs:
         with:
           node-version: '22'
       - name: JavaScript syntax
-        run: node --check crm-open.js
-      - name: No sign-in gate
+        run: node --check crm-direct.js
+      - name: Dependency-free entrypoint
         run: |
-          grep -q 'src="./crm-open.js' crm.html
+          grep -q 'src="./crm-direct.js' crm.html
+          ! grep -q 'type="module"' crm.html
+          ! grep -q 'esm.sh' crm-direct.js
           ! grep -q 'id="login"' crm.html
       - name: Required admin UI elements
         run: |
@@ -36,4 +38,4 @@ jobs:
         run: |
           test -s crm.html
           test -s crm.css
-          test -s crm-open.js
+          test -s crm-direct.js
