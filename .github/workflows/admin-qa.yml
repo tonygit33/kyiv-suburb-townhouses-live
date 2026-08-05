@@ -6,7 +6,7 @@ on:
     paths:
       - 'crm.html'
       - 'crm.css'
-      - 'crm.js'
+      - 'crm-open.js'
       - '.github/workflows/admin-qa.yml'
   workflow_dispatch:
 
@@ -22,7 +22,11 @@ jobs:
         with:
           node-version: '22'
       - name: JavaScript syntax
-        run: node --check crm.js
+        run: node --check crm-open.js
+      - name: No sign-in gate
+        run: |
+          grep -q 'src="./crm-open.js' crm.html
+          ! grep -q 'id="login"' crm.html
       - name: Required admin UI elements
         run: |
           for id in auth crm kpiGrid cityStrip catalogPanel unitList unitDetail duplicatesPanel sellersPanel invitesPanel; do
@@ -32,4 +36,4 @@ jobs:
         run: |
           test -s crm.html
           test -s crm.css
-          test -s crm.js
+          test -s crm-open.js
